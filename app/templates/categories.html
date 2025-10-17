@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Categories | Buudget Tracker {% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Add New Category</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control") }}
+            {% for error in form.name.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+
+    <hr>
+    <h3>Existing Categories</h3>
+    <ul class="list-group mt-3">
+        {% for c in categories %}
+            <li class="list-group-item">{{ c.name }}</li>
+        {% else %}
+            <li class="list-group-item text-muted">No categories yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

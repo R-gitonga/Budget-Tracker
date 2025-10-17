@@ -9,10 +9,13 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object('config.Config')
 
-    db.imit_app(app)
+    db.init_app(app)
     migrate.init_app(app, db)
 
-    from app import routes
-    app.register_blueprint(routes.bp)
+    from app.routes import bp as main_bp
+    app.register_blueprint(main_bp)
+
+    with app.app_context():
+        db.create_all()
 
     return app
