@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Transaction | Budget Tracker{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">Edit Transaction</h2>
+
+    <form method="POST">
+        {{ form.hidden_tag() }} <!-- CSRF token -->
+
+        <div class="mb-3">
+            {{ form.description.label(class="form-label") }}
+            {{ form.description(class="form-control", placeholder="Description") }}
+            {% for error in form.description.errors %}
+            <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.amount.label(class="form-label") }}
+            {{ form.amount(class="form-control", placeholder="Amount (Ksh)") }}
+            {% for error in form.amount.errors %}
+            <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.date.label(class="form-label") }}
+            {{ form.date(class="form-control") }}
+            {% for error in form.date.errors %}
+            <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.category_id.label(class="form-label") }}
+            {{ form.category_id(class="form-select") }}
+            {% for error in form.category_id.errors %}
+            <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+        <a href="{{ url_for('main.transactions') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

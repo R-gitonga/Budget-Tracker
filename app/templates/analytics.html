@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics | Budget Tracker{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">📈 Financial Analytics Dashboard</h2>    
+
+    <!-- overview cards -->
+     <div class="row g-3 mb-4">
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm border-success">
+                <div class="card-body textcenter">
+                    <h5 class="text-success fw-bold">Total Income</h5>
+                    <h3 class="text-success">Ksh {{ "{:,.2f}".format(income) }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm border-success">
+                <div class="card-body textcenter">
+                    <h5 class="text-success fw-bold">Total Expenses</h5>
+                    <h3 class="text-success">Ksh {{ "{:,.2f}".format(expenses) }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm border-success">
+                <div class="card-body text-center">
+                    <h5 class="text-success fw-bold">Net Balance</h5>
+                    <h3 class="{% if balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        Ksh {{ "{:,.2f}".format(balance) }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+     </div>
+</div>
+
+<!-- Charts -->
+ <div class="row g-4">
+    <!-- Income vs Expense Chart -->
+     <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title text-center">Income vs Expenses</h5>
+                <canvas id="incomeExpenseChart" style="max-height: 250px;"></canvas>
+            </div>
+        </div>
+     </div>
+
+     <!-- spending by category -->
+     <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title text-center">Spending by Cateogry</h5>
+                <canvas id="categoryChart" style="max-height: 250px;"></canvas>
+            </div>
+        </div>
+    </div>
+ </div>
+
+ <!-- spending over time -->
+  <div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title text-center">Spending Over Time</h5>
+                <canvas id="timeChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+  </div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Pass Flask data to JS -->
+<script>
+    window.analyticsData = {
+        incomeExpense: [{{ income }}, {{ expenses }}],
+        categories: {{ categories | tojson }},
+        categoryAmounts: {{ category_amounts | tojson }},
+        dates: {{ dates | tojson }},
+        dailyTotals: {{ daily_totals | tojson }}
+  };
+    console.log(window.analyticsData);
+</script>
+
+
+<!-- Link to External JS File -->
+<script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+{% endblock %}
+
