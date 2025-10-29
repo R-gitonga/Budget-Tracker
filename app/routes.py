@@ -1,14 +1,18 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask_login import login_required, current_user
 from sqlalchemy import text
 from datetime import datetime
 
-from app.models import Category, Transaction
+from app.models import Category, Transaction, User
 from app import db
-from app.forms import TransactionForm, CategoryForm
+from app.forms import TransactionForm, CategoryForm, RegistrationForm, LoginForm
+
 
 bp = Blueprint('main', __name__)
 
+
 @bp.route('/')
+@login_required
 def index():
     try:
         # simple query to check DB connection
@@ -19,8 +23,10 @@ def index():
     return render_template('dashboard.html')
 
 
+
 # Transactions Route
 @bp.route('/transactions')
+@login_required
 def transactions():
     transactions = Transaction.query.order_by(Transaction.date.desc()).all()
 
@@ -31,6 +37,7 @@ def transactions():
 
 # Add Transaction Route
 @bp.route('/transactions/add', methods=['GET', 'POST'])
+@login_required
 def add_transaction():
     form = TransactionForm()
     form.category_id.choices = [(c.id, c.name) for c in Category.query.all()] # Load Categories
@@ -52,8 +59,10 @@ def add_transaction():
     return render_template('add_transaction.html', form=form)
 
 
+
 # Edit transaction
 @bp.route('/transactions/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
 def edit_transaction(id):
     tx = Transaction.query.get_or_404(id)
     form = TransactionForm(obj=tx)  # prefill the form with the existing transaction data
@@ -73,10 +82,12 @@ def edit_transaction(id):
 
     return render_template('edit_transaction.html', form=form, transaction=tx)
 
-
+# @bp.route('/transactions/view/<int:id>', methods=['GET'])
+# @login_required
 
 #  Delete transaction
 @bp.route('/transactions/delete/<int:id>', methods=['GET'])
+@login_required
 def delete_transaction(id):
     transaction = Transaction.query.get_or_404(id)
     db.session.delete(transaction)
@@ -88,6 +99,7 @@ def delete_transaction(id):
 
 # Add Categories Route
 @bp.route('/categories', methods=['GET', 'POST'])
+@login_required
 def categories():
     form = CategoryForm()
     categories = Category.query.all()
@@ -101,9 +113,61 @@ def categories():
     
     return render_template('categories.html', form=form, categories=categories)
 
+@bp.route('/categories/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_category(id):
+    category = Category.query.get_or_404(id)
+    form = CategoryForm(obj=category)
+
+    if form.validate_on_submit():
+        category.name = form.name.data.strip()
+        db.session.commit()
+        flash('Category updated successfully!', 'success')
+        return redirect(url_for('main.categories'))
+
+    return render_template('edit_category.html', form=form, category=category)
+
+@bp.route('/categories/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_category(id):
+    category = Category.query.get_or_404(id)
+
+     # Check if category has transactions
+    if category.transactions:
+        flash("Cannot delete this category because it has linked transactions.", "danger")
+        return redirect(url_for('main.categories'))
+
+    db.session.delete(category)
+    db.session.commit()
+
+    flash('Category deleted successfully!', 'success')
+    return redirect(url_for('main.categories'))
+
+# Add category from transactions form
+@bp.route('/categories/add-modal', methods=['POST'])
+@login_required
+def add_category_modal():
+    name = request.form.get('name', '').strip()
+    if name:
+        existing = Category.query.filter_by(name=name).first()
+        if existing:
+            flash('Category already exists!', 'warning')
+        else:
+            new_category = Category(name=name)
+            db.session.add(new_category)
+            db.session.commit()
+            flash('Category added successfully!', 'success')
+    else:
+        flash('Category name cannot be empty!', 'danger')
+    return redirect(url_for('main.add_transaction'))
+
+
+
+
 
 # Analytics
 @bp.route('/analytics')
+@login_required
 def analytics():
     transactions = Transaction.query.all()
 

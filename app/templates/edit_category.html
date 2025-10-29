@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Transaction | Budget Tracker{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">Edit Transaction</h2>
+
+    <form method="POST">
+        {{ form.hidden_tag() }} <!-- CSRF token -->
+
+        <div class="mb-3">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control", placeholder="name") }}
+            {% for error in form.name.errors %}
+            <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+        <a href="{{ url_for('main.transactions') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

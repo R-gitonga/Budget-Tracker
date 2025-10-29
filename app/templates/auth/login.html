@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Login | Budget Tracker{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 450px;">
+    <h3 class="text-center mb-4">Welcome Back</h3>
+
+    <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control", placeholder="Enter your email") }}
+            {% for error in form.email.errors %}
+                <small class="text-danger">{{ error }}</small>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control", placeholder="Enter your password") }}
+            {% for error in form.password.errors %}
+            <small class="text-danger">{{ error }}</small>
+            {% endfor %}
+        </div>
+
+        <div class="form-check mb-3">
+            {{ form.remember(class="form-check-input") }}
+            {{ form.remember.label(class="form-check-label") }}
+        </div>
+
+        <div class="d-grid">
+            <button class="btn btn-primary" type="submit">Login</button>
+        </div>
+
+        <p class="text-center mt-3">
+            Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a>.
+        </p>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Register | Budget Tracker{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 450px;">
+    <h3 class="text-center mb-4">Create Your Account</h3>
+
+    <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.username.label(class="form-label") }}
+            {{ form.username(class="form-control", placeholder="Enter your username") }}
+            {% for error in form.username.errors %}
+                <small class="text-danger">{{ error }}</small>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control", placeholder="Enter your email") }}
+            {% for error in form.email.errors %}
+                <small class="text-danger">{{ error }}</small>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control", placeholder="Enter your password") }}
+            {% for error in form.password.errors %}
+            <small class="text-danger">{{ error }}</small>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.confirm_password.label(class="form-label") }}
+            {{ form.confirm_password(class="form-control", placeholder="confirm password") }}
+            {% for error in form.confirm_password.errors %}
+            <small class="text-danger">{{ error }}</small>
+            {% endfor %}
+        </div>
+
+        <div class="d-grid">
+            <button class="btn btn-success" type="submit">Register</button>
+        </div>
+        <p class="text-center mt-3">
+            Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a>.
+        </p>
+    </form>
+</div>
+{% endblock %}
