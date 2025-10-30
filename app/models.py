@@ -3,6 +3,27 @@ from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
+# Goals table
+class Goal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    target_amount = db.Column(db.Float, nullable=False)
+    deadline = db.Column(db.Date, nullable=False)
+    progress = db.Column(db.Float, default=0.0)
+    status = db.Column(db.String(50), default="Not Started")
+
+    # Each goal belong to a user
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    # optional: Link to category for financial grouping
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<Goal {self.name} - {self.status}>"
+        
 # users table
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)

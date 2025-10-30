@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Goals | Budget Tracker{% endblock %}
+
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>💡 Smart Goals</h2>
+        <a href="{{ url_for('main.add_goal') }}" class="btn btn-success">
+            + New Goal
+        </a>
+    </div>
+
+    <!-- Table view for Desktop -->
+     <div class="table-responsive d-none d-md-block">
+        <table class="table table-hover align-middle shadow-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>Goal Name</th>
+                    <th>Target (KES)</th>
+                    <th>Progress</th>
+                    <th>Deadline</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for goal in goals %}
+                <tr>
+                    <td>{{ goal.name }}</td>
+                    <td>{{ "{:,.2f}".format(goal.target_amount) }}</td>
+                    <td>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar
+                                {% if goal.progress >= 75 %}bg-success
+                                {% elif goal.progress >= 40 %}bg-warning
+                                {% else %}bg-danger{% endif %}"
+                                role="progressbar"
+                                style="width: {{ goal.progress }}%;">
+                            </div>
+                        </div>
+                        <small>{{ goal.progress }}%</small>
+                    </td>
+                    <td>{{ goal.deadline.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <span class="badge
+                            {% if goal.status == 'Completed' %}bg-success
+                            {% elif goal.status == 'In Progress' %}bg-warning
+                            {% else %}bg-secondary{% endif %}">
+                            {{ goal.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-outline-info">View</a>
+                        <a href="{{ url_for('main.edit_goal', id=goal.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-3">
+                        No goals yet. Start by creating one!
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+     </div>
+
+     <!-- Card view for mobile -->
+    <div class="d-md-none">
+        {% for goal in goals %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ goal.name }}</h5>
+                <p class="mb-1"><strong>Target:</strong> KES {{ "{:,.2f}".format(goal.target_amount) }}</p>
+                <p class="mb-1"><strong>Deadline:</strong> {{ goal.deadline.strftime('%Y-%m-%d') }}</p>
+                <p><strong>Status:</strong>
+                    <span class="badge 
+                            {% if goal.status == 'Completed' %}bg-success
+                            {% elif goal.status == 'In Progress' %}bg-warning
+                            {% else %}bg-secondary{% endif %}">
+                        {{ goal.status }}
+                    </span>
+                </p>
+                <div class="progress mb-2" style="height: 10px;">
+                    <div class="progress-bar 
+                            {% if goal.progress >= 75 %}bg-success
+                            {% elif goal.progress >= 40 %}bg-warning
+                            {% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ goal.progress }}%;">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="#" class="btn btn-sm btn-outline-info">View</a>
+                    <a href="{{ url_for('main.edit_goal', id=goal.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-center text-muted">No goals yet. Start by creating one!</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

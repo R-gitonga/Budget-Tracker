@@ -3,9 +3,9 @@ from flask_login import login_required, current_user
 from sqlalchemy import text
 from datetime import datetime
 
-from app.models import Category, Transaction, User
+from app.models import Category, Goal, Transaction, User
 from app import db
-from app.forms import TransactionForm, CategoryForm, RegistrationForm, LoginForm
+from app.forms import GoalForm, TransactionForm, CategoryForm, RegistrationForm, LoginForm
 
 
 bp = Blueprint('main', __name__)
@@ -81,9 +81,6 @@ def edit_transaction(id):
         flash('Please correct the errors below.', 'danger')
 
     return render_template('edit_transaction.html', form=form, transaction=tx)
-
-# @bp.route('/transactions/view/<int:id>', methods=['GET'])
-# @login_required
 
 #  Delete transaction
 @bp.route('/transactions/delete/<int:id>', methods=['GET'])
@@ -212,3 +209,62 @@ def analytics():
         daily_totals=daily_totals
     )
 
+
+# Goals
+# View all goals
+@bp.route('/goals')
+@login_required
+def goals():
+    user_goals = Goal.query.filter_by(user_id=current_user.id).all()
+    return render_template('goals.html', goals=user_goals)
+
+# Add new goal
+@bp.route('/goals/add', methods=['GET', 'POST'])
+@login_required
+def add_goal():
+    form = GoalForm()
+    form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
+    print("Request method:", request.method)
+    print("Form errors:", form.errors)
+
+    if form.validate_on_submit():
+        
+        new_goal = Goal(
+            name=form.name.data,
+            description=form.description.data,
+            target_amount=form.target_amount.data,
+            deadline=form.deadline.data,
+            progress=form.progress.data or 0,
+            status=form.status.data,
+            user_id=current_user.id,
+            category_id=form.category_id.data
+        )
+        db.session.add(new_goal)
+        db.session.commit()
+        print('✅ Form Submitted')
+        flash('New goal added successfully!', 'success')
+        return redirect(url_for('main.goals'))
+    return render_template('add_goal.html', form=form)
+
+# Edit goal
+# @bp.route('/goals/edit/<int:id>', methods=['GET', 'POST'])
+# @login_required
+# def edit_goal(id):
+#     goal = Goal.query.get_or_404(id)
+#     form = GoalForm(obj=goal)
+#     form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
+
+#     if form.validate_on_submit():
+#         goal.name = form.name.data
+#         goal.description = form.description.data
+#         goal.target_amount = form.target_amount.data
+#         goal.deadline = form.deadline.data
+#         goal.progress = form.progress.data
+#         goal.status = form.status.data
+#         goal.category_id = form.category_id.data
+
+#         db.session.commit()
+#         flash('Goal updated successfully!', 'success')
+#         return redirect(url_for('main.goals'))
+
+#     return render_template('edit_goal.html', form=form, goal=goal)

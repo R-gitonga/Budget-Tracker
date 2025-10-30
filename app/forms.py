@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, StringField, FloatField, SelectField, DateField, SubmitField, PasswordField
-from wtforms.validators import DataRequired, NumberRange, Length, Email, EqualTo
+from wtforms import BooleanField, StringField, FloatField, SelectField, DateField, SubmitField, PasswordField, TextAreaField, DecimalField
+from wtforms.validators import DataRequired, NumberRange, Length, Email, Optional, EqualTo
 
 class CategoryForm(FlaskForm):
     name = StringField('Category Name', validators=[DataRequired(), Length(min=2, max=50)])
@@ -28,3 +28,13 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
+
+class GoalForm(FlaskForm):
+    name = StringField('Goal Name', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[Optional()])
+    target_amount = FloatField('Target Amount', validators=[DataRequired()])
+    deadline = DateField('Deadline', format='%Y-%m-%d', validators=[DataRequired()])
+    category_id = SelectField('Category', coerce=int, validators=[Optional()])
+    progress = FloatField('Progress', default=0, validators=[Optional()])
+    status = StringField('Status', default='Not Started', validators=[Optional()])
+    submit = SubmitField('Save Goal')

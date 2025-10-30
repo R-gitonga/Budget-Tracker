@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Add New Goal | Budget Tracker{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h3 class="mb-4 text-center">🎯 Create a New Smart Goal</h3>
+
+            <form method="POST" action="{{ url_for('main.add_goal') }}">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    {{ form.name.label(class="form-label fw-bold") }}
+                    {{ form.name(class="form-control", placeholder="e.g., Buy a new laptop") }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.description.label(class="form-label fw-bold") }}
+                    {{ form.description(class="form-control", rows="3", placeholder="Describe your goal...") }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.target_amount.label(class="form-label fw-bold") }}
+                        {{ form.target_amount(class="form-control", placeholder="e.g., 50000") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.deadline.label(class="form-label fw-bold") }}
+                        {{ form.deadline(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form. category_id.label(class="form-label fw-bold") }}
+                    {{ form. category_id(class="form-select") }}
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success px-4">Save Goal</button>
+                    <a href="{{ url_for('main.goals') }}" class="btn btn-secondary px-4">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
