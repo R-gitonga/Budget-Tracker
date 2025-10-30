@@ -40,14 +40,17 @@ def transactions():
 @login_required
 def add_transaction():
     form = TransactionForm()
-    form.category_id.choices = [(c.id, c.name) for c in Category.query.all()] # Load Categories
+    form.category_id.choices = [
+    (c.id, c.name) for c in Category.query.filter_by(user_id=current_user.id).all()] # Load Categories
 
     if form.validate_on_submit():
         new_tx = Transaction(
             description=form.description.data,
             amount=form.amount.data,
             date=form.date.data,
-            category_id=form.category_id.data
+            category_id=form.category_id.data,
+            user_id=current_user.id  # ✅ Assign user here
+
         )
         db.session.add(new_tx)
         db.session.commit()
@@ -66,7 +69,9 @@ def add_transaction():
 def edit_transaction(id):
     tx = Transaction.query.get_or_404(id)
     form = TransactionForm(obj=tx)  # prefill the form with the existing transaction data
-    form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]  # load category list
+    form.category_id.choices = [
+    (c.id, c.name) for c in Category.query.filter_by(user_id=current_user.id).all()
+]  # load category list
 
     if form.validate_on_submit():
         tx.description = form.description.data
@@ -99,10 +104,14 @@ def delete_transaction(id):
 @login_required
 def categories():
     form = CategoryForm()
-    categories = Category.query.all()
+    categories = Category.query.filter_by(user_id=current_user.id).all()
 
     if form.validate_on_submit():
-        new_category = Category(name=form.name.data.strip())
+        new_category = Category(
+            name=form.name.data.strip(),
+            user_id=current_user.id
+            
+            )
         db.session.add(new_category)
         db.session.commit()
         flash('Category added successfully!', "success")
@@ -150,7 +159,10 @@ def add_category_modal():
         if existing:
             flash('Category already exists!', 'warning')
         else:
-            new_category = Category(name=name)
+            new_category = Category(
+                name=name,
+                user_id=current_user.id
+                )
             db.session.add(new_category)
             db.session.commit()
             flash('Category added successfully!', 'success')
@@ -223,7 +235,8 @@ def goals():
 @login_required
 def add_goal():
     form = GoalForm()
-    form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
+    form.category_id.choices = [
+    (c.id, c.name) for c in Category.query.filter_by(user_id=current_user.id).all()]
     print("Request method:", request.method)
     print("Form errors:", form.errors)
 
