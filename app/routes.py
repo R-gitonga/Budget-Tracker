@@ -28,7 +28,8 @@ def index():
 @bp.route('/transactions')
 @login_required
 def transactions():
-    transactions = Transaction.query.order_by(Transaction.date.desc()).all()
+    transactions = Transaction.query.filter_by(user_id=current_user.id)\
+    .order_by(Transaction.date.desc()).all()
 
     income = sum(t.amount for t in transactions if t.amount > 0)
     expenses = sum(abs(t.amount) for t in transactions if t.amount < 0)
@@ -67,11 +68,13 @@ def add_transaction():
 @bp.route('/transactions/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_transaction(id):
-    tx = Transaction.query.get_or_404(id)
-    form = TransactionForm(obj=tx)  # prefill the form with the existing transaction data
+    # Only allow the user to edit their own transactions
+    tx = Transaction.query.filter_by(id=id, user_id=current_user.id).first_or_404()
+
+    form = TransactionForm(obj=tx)
     form.category_id.choices = [
-    (c.id, c.name) for c in Category.query.filter_by(user_id=current_user.id).all()
-]  # load category list
+        (c.id, c.name) for c in Category.query.filter_by(user_id=current_user.id).all()
+    ]
 
     if form.validate_on_submit():
         tx.description = form.description.data
@@ -82,16 +85,17 @@ def edit_transaction(id):
         db.session.commit()
         flash('Transaction updated successfully!', 'success')
         return redirect(url_for('main.transactions'))
-    elif form.errors:
+
+    if form.errors:
         flash('Please correct the errors below.', 'danger')
 
-    return render_template('edit_transaction.html', form=form, transaction=tx)
+    return render_template('edit_transaction.html', form=form, tx=tx)
 
 #  Delete transaction
 @bp.route('/transactions/delete/<int:id>', methods=['GET'])
 @login_required
 def delete_transaction(id):
-    transaction = Transaction.query.get_or_404(id)
+    transaction = Transaction.query.filter_by(id=id, user_id=current_user.id).first_or_404(id)
     db.session.delete(transaction)
     db.session.commit()
     flash('Transaction deleted successfully!', 'success')
@@ -122,7 +126,7 @@ def categories():
 @bp.route('/categories/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_category(id):
-    category = Category.query.get_or_404(id)
+    category = Category.query.filter_by(id=id, user_id=current_user.id).first_or_404(id)
     form = CategoryForm(obj=category)
 
     if form.validate_on_submit():
@@ -136,7 +140,7 @@ def edit_category(id):
 @bp.route('/categories/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_category(id):
-    category = Category.query.get_or_404(id)
+    category = Category.query.filter_by(id=id, user_id=current_user.id).first_or_404()
 
      # Check if category has transactions
     if category.transactions:
@@ -154,20 +158,24 @@ def delete_category(id):
 @login_required
 def add_category_modal():
     name = request.form.get('name', '').strip()
-    if name:
-        existing = Category.query.filter_by(name=name).first()
-        if existing:
-            flash('Category already exists!', 'warning')
-        else:
-            new_category = Category(
-                name=name,
-                user_id=current_user.id
-                )
-            db.session.add(new_category)
-            db.session.commit()
-            flash('Category added successfully!', 'success')
-    else:
+
+    if not name:
         flash('Category name cannot be empty!', 'danger')
+        return redirect(url_for('main.add_transaction'))
+
+    # ✅ Ensure category names are unique *per user*, not globally
+    existing = Category.query.filter_by(name=name, user_id=current_user.id).first()
+    if existing:
+        flash('You already have a category with that name!', 'warning')
+    else:
+        new_category = Category(
+            name=name,
+            user_id=current_user.id
+        )
+        db.session.add(new_category)
+        db.session.commit()
+        flash('Category added successfully!', 'success')
+
     return redirect(url_for('main.add_transaction'))
 
 
@@ -178,22 +186,23 @@ def add_category_modal():
 @bp.route('/analytics')
 @login_required
 def analytics():
-    transactions = Transaction.query.all()
+    # Get all transactions for the logged-in user
+    transactions = Transaction.query.filter_by(user_id=current_user.id).all()
 
-    # Income and expense totals
+    # Compute income, expenses, and balance
     income = sum(t.amount for t in transactions if t.amount > 0)
     expenses = sum(abs(t.amount) for t in transactions if t.amount < 0)
     balance = income - expenses
 
-    # Spending by category
-    categories = [c.name for c in Category.query.all()]
-    category_amounts = []
-    for c in Category.query.all():
-        total = sum(abs(t.amount) for t in transactions if t.category_id == c.id and t.amount < 0)
-        category_amounts.append(total)
+    # Spending by category (filtered by user)
+    user_categories = Category.query.filter_by(user_id=current_user.id).all()
+    categories = [c.name for c in user_categories]
+    category_amounts = [
+        sum(abs(t.amount) for t in transactions if t.category_id == c.id and t.amount < 0)
+        for c in user_categories
+    ]
 
-    # spending over time (grouped by date)
-
+    # Spending over time (grouped by date)
     from collections import defaultdict
     from datetime import datetime
 
@@ -204,11 +213,6 @@ def analytics():
 
     dates = list(daily_spending.keys())
     daily_totals = list(daily_spending.values())
-
-    print("DATES:", dates)
-    print("TOTALS:", daily_totals)
-
-
 
     return render_template(
         'analytics.html',
@@ -237,21 +241,21 @@ def add_goal():
     form = GoalForm()
     form.category_id.choices = [
     (c.id, c.name) for c in Category.query.filter_by(user_id=current_user.id).all()]
-    print("Request method:", request.method)
-    print("Form errors:", form.errors)
 
     if form.validate_on_submit():
         
         new_goal = Goal(
             name=form.name.data,
             description=form.description.data,
-            target_amount=form.target_amount.data,
+            target_amount=form.target_amount.data or 0,
+            current_amount=form.current_amount.data or 0,
             deadline=form.deadline.data,
             progress=form.progress.data or 0,
             status=form.status.data,
             user_id=current_user.id,
             category_id=form.category_id.data
         )
+        new_goal.progress = (new_goal.current_amount / new_goal.target_amount * 100) if new_goal.target_amount > 0 else 0.0
         db.session.add(new_goal)
         db.session.commit()
         print('✅ Form Submitted')
@@ -259,25 +263,37 @@ def add_goal():
         return redirect(url_for('main.goals'))
     return render_template('add_goal.html', form=form)
 
+# View goal details
+@bp.route('/goals/<int:id>')
+@login_required
+def view_goal(id):
+    goal = Goal.query.filter_by(id=id, user_id=current_user.id).first_or_404()
+    return render_template('goals/view_goal.html', goal=goal)
+
+
 # Edit goal
-# @bp.route('/goals/edit/<int:id>', methods=['GET', 'POST'])
-# @login_required
-# def edit_goal(id):
-#     goal = Goal.query.get_or_404(id)
-#     form = GoalForm(obj=goal)
-#     form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
+@bp.route('/goals/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_goal(id):
+    goal = Goal.query.filter_by(id=id, user_is=current_user.id).first_or_404()
 
-#     if form.validate_on_submit():
-#         goal.name = form.name.data
-#         goal.description = form.description.data
-#         goal.target_amount = form.target_amount.data
-#         goal.deadline = form.deadline.data
-#         goal.progress = form.progress.data
-#         goal.status = form.status.data
-#         goal.category_id = form.category_id.data
+    if request.method == 'POST':
+        goal.name = request.form['name']
+        goal.target_amount = float(request.form['target_amount']) or 0
+        goal.current_amount = float(request.form['current_amount']) or 0
+        goal.deadline = request.form['deadline']
+        goal.status = request.form['status']
+        goal.progress = (goal.current_amount / goal.target_amount) * 100 if goal.target_amount else 0
+        db.session.commit()
+        flash('Goal updated successfully!', 'success')
+        return redirect(url_for('main.goal'))
+    return render_template('goals/edit_goal.html', goal=goal)
 
-#         db.session.commit()
-#         flash('Goal updated successfully!', 'success')
-#         return redirect(url_for('main.goals'))
-
-#     return render_template('edit_goal.html', form=form, goal=goal)
+# delete goal
+@bp.route('/goals/delete/<int:id>', methods=['POST'])
+def delete_goal(id):
+    goal = Goal.query.filter_by(id=id, user_id=current_user.id).first_or_404()
+    db.session.delete(goal)
+    db.session.commit()
+    flash('Goal deleted successfully', 'success')
+    return redirect(url_for('main.goals'))

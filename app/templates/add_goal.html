@@ -26,9 +26,14 @@
                         {{ form.target_amount(class="form-control", placeholder="e.g., 50000") }}
                     </div>
                     <div class="col-md-6 mb-3">
-                        {{ form.deadline.label(class="form-label fw-bold") }}
-                        {{ form.deadline(class="form-control") }}
-                    </div>
+                        {{ form.current_amount.label(class="form-label fw-bold") }}
+                        {{ form.current_amount(class="form-control") }}
+                    </div>     
+                </div>
+
+                <div class="mb-3">
+                    {{ form.deadline.label(class="form-label fw-bold") }}
+                    {{ form.deadline(class="form-control") }}
                 </div>
 
                 <div class="mb-3">

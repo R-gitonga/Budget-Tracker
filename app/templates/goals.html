@@ -19,6 +19,7 @@
                 <tr>
                     <th>Goal Name</th>
                     <th>Target (KES)</th>
+                    <th>Current Amount</th>
                     <th>Progress</th>
                     <th>Deadline</th>
                     <th>Status</th>
@@ -29,7 +30,8 @@
                 {% for goal in goals %}
                 <tr>
                     <td>{{ goal.name }}</td>
-                    <td>{{ "{:,.2f}".format(goal.target_amount) }}</td>
+                    <td>{{ "{:,.2f}".format(goal.target_amount or 0) }}</td>
+                    <td>{{ "{:,.2f}".format(goal.current_amount or 0) }}</td>
                     <td>
                         <div class="progress" style="height: 10px;">
                             <div class="progress-bar
@@ -52,9 +54,11 @@
                         </span>
                     </td>
                     <td>
-                        <a href="#" class="btn btn-sm btn-outline-info">View</a>
-                        <a href="#" class="btn btn-sm btn-outline-primary">Edit</a>
-                        <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
+                        <a href="{{ url_for('main.view_goal', id=goal.id) }}" class="btn btn-sm btn-outline-info">View</a>
+                        <a href="{{ url_for('main.edit_goal', id=goal.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <form action="{{ url_for('main.delete_goal', id=goal.id) }}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                        </form>
                     </td>
                 </tr>
                 {% else %}
@@ -74,7 +78,10 @@
         <div class="card mb-3 shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">{{ goal.name }}</h5>
-                <p class="mb-1"><strong>Target:</strong> KES {{ "{:,.2f}".format(goal.target_amount) }}</p>
+                <p class="mb-1"><strong>Target:</strong> KES {{ "{:,.2f}".format(goal.target_amount or 0) }}</p>
+
+                <p class="mb-1"><strong>Current:</strong> KES {{ "{:,.2f}".format(goal.current_amount or 0) }}</p>
+
                 <p class="mb-1"><strong>Deadline:</strong> {{ goal.deadline.strftime('%Y-%m-%d') }}</p>
                 <p><strong>Status:</strong>
                     <span class="badge 
@@ -92,9 +99,11 @@
                     </div>
                 </div>
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="#" class="btn btn-sm btn-outline-info">View</a>
-                    <a href="#" class="btn btn-sm btn-outline-primary">Edit</a>
-                    <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
+                    <a href="{{ url_for('main.view_goal', id=goal.id) }}" class="btn btn-sm btn-outline-info">View</a>
+                    <a href="{{ url_for('main.edit_goal', id=goal.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <form action="{{ url_for('main.delete_goal', id=goal.id) }}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                    </form>
                 </div>
             </div>
         </div>

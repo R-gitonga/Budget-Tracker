@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">{{ goal.name }}</h2>
+
+    <div class="card p-4 shadow-sm">
+        <p><strong>Description:</strong> {{ goal.description or 'No description provided.' }}</p>
+        <p><strong>Category:</strong> {{ goal.category.name if goal.category else "Uncategorized" }}</p>
+        <p><strong>Target Amount:</strong> {{ goal.target_amount }}</p>
+        <p><strong>Current Amount:</strong> {{ goal.current_amount }}</p>
+        <p><strong>Deadline:</strong> {{ goal.deadline.strftime("%Y-%m-%d") if goal.deadline else "No deadline set" }}
+        </p>
+        <p><strong>Status:</strong> {{ goal.status }}</p>
+
+        <div class="progress my-3" style="height: 20px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: {{ goal.progress }}%;"
+                aria-valuenow="{{ goal.progress }}" aria-valuemin="0" aria-valuemax="100">
+                {{ "%.1f"|format(goal.progress) }}%
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a href="{{ url_for('main.edit_goal', id=goal.id) }}" class="btn btn-primary">Edit</a>
+            <a href="{{ url_for('main.delete_goal', id=goal.id) }}" class="btn btn-danger"
+                onclick="return confirm('Are you sure you want to delete this goal?');">Delete</a>
+            <a href="{{ url_for('main.goals') }}" class="btn btn-secondary">Back</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

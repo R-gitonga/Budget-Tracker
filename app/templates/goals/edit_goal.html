@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Edit Goal</h2>
+    <form method="post">
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.description.label(class="form-label") }}
+            {{ form.description(class="form-control") }}
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.target_amount.label(class="form-label") }}
+                {{ form.target_amount(class="form-control") }}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.current_amount.label(class="form-label") }}
+                {{ form.current_amount(class="form-control") }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.deadline.label(class="form-label") }}
+                {{ form.deadline(class="form-control") }}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.status.label(class="form-label") }}
+                {{ form.status(class="form-control") }}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form.category_id.label(class="form-label") }}
+            {{ form.category_id(class="form-select") }}
+        </div>
+
+        <button type="submit" class="btn btn-success">Save Changes</button>
+        <a href="{{ url_for('main.goals') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

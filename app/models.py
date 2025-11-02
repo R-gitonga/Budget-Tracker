@@ -8,7 +8,8 @@ class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    target_amount = db.Column(db.Float, nullable=False)
+    target_amount = db.Column(db.Float, default=0, nullable=False)
+    current_amount = db.Column(db.Float, default=0.0)
     deadline = db.Column(db.Date, nullable=False)
     progress = db.Column(db.Float, default=0.0)
     status = db.Column(db.String(50), default="Not Started")
@@ -33,6 +34,7 @@ class User(UserMixin, db.Model):
 
     transactions = db.relationship('Transaction', backref='user', lazy=True)
     categories = db.relationship('Category', backref='user', lazy=True)
+    goals = db.relationship('Goal', backref='user', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

@@ -33,6 +33,7 @@ class GoalForm(FlaskForm):
     name = StringField('Goal Name', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[Optional()])
     target_amount = FloatField('Target Amount', validators=[DataRequired()])
+    current_amount = FloatField('Current Amount', default=0)
     deadline = DateField('Deadline', format='%Y-%m-%d', validators=[DataRequired()])
     category_id = SelectField('Category', coerce=int, validators=[Optional()])
     progress = FloatField('Progress', default=0, validators=[Optional()])

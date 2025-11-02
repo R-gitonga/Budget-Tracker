@@ -36,7 +36,8 @@ def login():
     return render_template('auth/login.html', form=form)
 
 @bp.route('/logout')
+@login_required
 def logout():
     logout_user()
-    flash('You have been logged out.', 'info')
+    flash('You have been logged out successfully.', 'info')
     return redirect(url_for('auth.login'))
