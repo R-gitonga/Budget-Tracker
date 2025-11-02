@@ -29,7 +29,7 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user)
             flash('Welcome back', 'success')
-            return redirect(url_for('main.index'))
+            return redirect(url_for('main.transactions'))
         else:
             flash('Invalid email or password', 'danger')
 

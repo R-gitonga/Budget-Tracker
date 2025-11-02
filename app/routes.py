@@ -12,15 +12,9 @@ bp = Blueprint('main', __name__)
 
 
 @bp.route('/')
-@login_required
-def index():
-    try:
-        # simple query to check DB connection
-        db.session.execute(text('SELECT 1'))
-        flash('Database connected successfully!', "success")
-    except Exception as e:
-        flash(f"Database connection failed: {str(e)}", "danger")
-    return render_template('dashboard.html')
+def home():
+    return render_template('home.html')
+
 
 
 
