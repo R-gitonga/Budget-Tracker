@@ -62,7 +62,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form method="POST" action="{{ url_for('main.add_category_modal') }}">
-                    <input type="hidden" name="csrf_token" value="{{ form.csrf_token }}" />
+                    <input type="hidden" name="csrf_token" value="{{ form.csrf_token._value() }}">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="categoryName" class="form-label">Category Name</label>
