@@ -147,6 +147,8 @@ def delete_category(id):
     flash('Category deleted successfully!', 'success')
     return redirect(url_for('main.categories'))
 
+from flask_wtf.csrf import generate_csrf
+
 # Add category from transactions form
 @bp.route('/categories/add-modal', methods=['POST'])
 @login_required
