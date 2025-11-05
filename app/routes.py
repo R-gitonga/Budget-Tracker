@@ -271,7 +271,7 @@ def view_goal(id):
 @bp.route('/goals/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_goal(id):
-    goal = Goal.query.filter_by(id=id, user_is=current_user.id).first_or_404()
+    goal = Goal.query.filter_by(id=id, user_id=current_user.id).first_or_404()
 
     if request.method == 'POST':
         goal.name = request.form['name']
