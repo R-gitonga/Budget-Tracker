@@ -1,16 +1,18 @@
 from app import create_app, db
-from app.models import Category, Transaction
+from app.models import Category, Goal, Transaction
 
 app = create_app()
 
 with app.app_context():
-    # delete all data
+    print("This deletes ALL transactions, goals and categories for ALL users.")
+    print("User accounts are kept.")
+    if input("Type 'yes' to continue: ").strip().lower() != "yes":
+        print("Cancelled. Nothing was deleted.")
+        raise SystemExit(1)
+
+    # Order matters: goals and transactions both point at categories.
+    db.session.query(Goal).delete()
     db.session.query(Transaction).delete()
     db.session.query(Category).delete()
     db.session.commit()
-    print("Database reset: all data deleted.")
-
-# for table in reversed(db.metadata.sorted_tables):
-#     db.session.execute(table.delete())
-# db.session.commit() wipes data from all tables
-
+    print("Done: transactions, goals and categories deleted.")

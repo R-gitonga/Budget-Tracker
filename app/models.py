@@ -1,7 +1,12 @@
 from app import db
-from datetime import datetime
+from datetime import date as date_type, datetime, timezone
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+
+def utc_now():
+    """Current UTC time as a naive datetime (matches the DateTime columns below)."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
 
 # Goals table
 class Goal(db.Model):
@@ -20,7 +25,7 @@ class Goal(db.Model):
     # optional: Link to category for financial grouping
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utc_now)
 
     def __repr__(self):
         return f"<Goal {self.name} - {self.status}>"
@@ -45,8 +50,12 @@ class User(UserMixin, db.Model):
 
 # category table
 class Category(db.Model):
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'name', name='uq_category_user_name'),
+    )
+
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False, unique=True)
+    name = db.Column(db.String(50), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', name='fk_category_user_id'), nullable=False)
     # relationship to transaction
     transactions = db.relationship('Transaction', backref='category_ref', lazy=True)
@@ -56,7 +65,7 @@ class Category(db.Model):
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    date=db.Column(db.Date, default=datetime.utcnow)
+    date = db.Column(db.Date, default=date_type.today)
     description = db.Column(db.String(120), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', name='fk_trnsaction_user_id'), nullable=False)

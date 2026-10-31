@@ -58,7 +58,8 @@ const ctx3 = document.getElementById("timeChart");
                 datasets: [{
                     label: "Net Spending (Ksh)",
                     data: window.analyticsData.dailyTotals,
-                    borderColor: "rgba(13, 110, 253, 0.1)",
+                    borderColor: "rgb(13, 110, 253)",
+                    backgroundColor: "rgba(13, 110, 253, 0.1)",
                     fill: true,
                     tension: 0.3,
                 }]
@@ -77,5 +78,3 @@ const ctx3 = document.getElementById("timeChart");
     }
 
 });
-
-

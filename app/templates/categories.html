@@ -25,9 +25,9 @@
                 <td>{{ c.name }}</td>
                 <td class="text-center">
                     <a href="{{ url_for('main.edit_category', id=c.id) }}" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="{{ url_for('main.delete_category', id=c.id) }}" method="POST" style="display:inline;">
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                    </form>
+                    <form action="{{ url_for('main.delete_category', id=c.id) }}" method="POST" style="display:inline;"
+    onsubmit="return confirm('Delete this category?');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 </td>
             </tr>
             {% endfor %}
